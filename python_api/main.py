@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 import csv
+import sqlite3
 
 from models.movie import Movie
 from models.link import Link
@@ -19,18 +20,25 @@ def get_movies():
 
     movies = []
 
-    with open("data/movies.csv", encoding="utf-8") as file:
+    conn = sqlite3.connect("movies.db")
+    cursor = conn.cursor()
 
-        reader = csv.DictReader(file)
+    cursor.execute("SELECT * FROM movies")
 
-        for row in reader:
-            movie = Movie(
-                row["movieId"],
-                row["title"],
-                row["genres"]
-            )
+    rows = cursor.fetchall()
 
-            movies.append(movie.__dict__)
+    movies = []
+
+    for row in rows:
+        movie = Movie(
+            row[0],
+            row[1],
+            row[2]
+        )
+
+        movies.append(movie.__dict__)
+
+    conn.close()
 
     return movies
 
@@ -38,63 +46,78 @@ def get_movies():
 @app.get("/links")
 def get_links():
 
-    links = []
+    conn = sqlite3.connect("movies.db")
+    cursor = conn.cursor()
 
-    with open("data/links.csv", encoding="utf-8") as file:
+    cursor.execute("SELECT * FROM links")
 
-        reader = csv.DictReader(file)
+    rows = cursor.fetchall()
 
-        for row in reader:
-            link = Link(
-                row["movieId"],
-                row["imdbId"],
-                row["tmdbId"]
-            )
+    result = []
 
-            links.append(link.__dict__)
+    for row in rows:
+        link = Link(
+            row[0],
+            row[1],
+            row[2]
+        )
 
-    return links
+        result.append(link.__dict__)
+
+    conn.close()
+
+    return result
 
 
 @app.get("/ratings")
 def get_ratings():
 
-    ratings = []
+    conn = sqlite3.connect("movies.db")
+    cursor = conn.cursor()
 
-    with open("data/ratings.csv", encoding="utf-8") as file:
+    cursor.execute("SELECT * FROM ratings")
 
-        reader = csv.DictReader(file)
+    rows = cursor.fetchall()
 
-        for row in reader:
-            rating = Rating(
-                row["userId"],
-                row["movieId"],
-                row["rating"],
-                row["timestamp"]
-            )
+    result = []
 
-            ratings.append(rating.__dict__)
+    for row in rows:
+        rating = Rating(
+            row[0],
+            row[1],
+            row[2],
+            row[3]
+        )
 
-    return ratings
+        result.append(rating.__dict__)
+
+    conn.close()
+
+    return result
 
 
 @app.get("/tags")
 def get_tags():
 
-    tags = []
+    conn = sqlite3.connect("movies.db")
+    cursor = conn.cursor()
 
-    with open("data/tags.csv", encoding="utf-8") as file:
+    cursor.execute("SELECT * FROM tags")
 
-        reader = csv.DictReader(file)
+    rows = cursor.fetchall()
 
-        for row in reader:
-            tag = Tag(
-                row["userId"],
-                row["movieId"],
-                row["tag"],
-                row["timestamp"]
-            )
+    result = []
 
-            tags.append(tag.__dict__)
+    for row in rows:
+        tag = Tag(
+            row[0],
+            row[1],
+            row[2],
+            row[3]
+        )
 
-    return tags
+        result.append(tag.__dict__)
+
+    conn.close()
+
+    return result
